@@ -3,7 +3,6 @@ export class ApiError extends Error {
     message: string,
     public readonly status: number,
     public readonly code?: string,
-    public readonly response?: Response,
   ) {
     super(message);
 
@@ -38,5 +37,5 @@ export async function getApiError(response: Response): Promise<ApiError> {
     // Keep the fallback message when the response has no valid JSON body.
   }
 
-  return new ApiError(message, response.status, code, response);
+  return new ApiError(message, response.status, code);
 }

@@ -5,16 +5,16 @@ export default function Page() {
     <main className="space-y-4 p-8">
       <h1 className="font-serif text-3xl">Workspaces (serif title)</h1>
 
-      <p className="font-mono text-xs uppercase tracking-wider text-text-tertiary">
+      <p className="font-mono text-xs tracking-wider text-text-tertiary uppercase">
         mono metadata · text-tertiary
       </p>
 
       <div className="flex flex-wrap gap-2">
-        <span className="rounded-sm border border-status-progress-border bg-status-progress-bg px-2 py-0.5 font-mono text-[11px] uppercase text-status-progress">
+        <span className="rounded-sm border border-status-progress-border bg-status-progress-bg px-2 py-0.5 font-mono text-[11px] text-status-progress uppercase">
           In progress
         </span>
 
-        <span className="rounded-sm border border-status-todo-border bg-status-todo-bg px-2 py-0.5 font-mono text-[11px] uppercase text-status-todo">
+        <span className="rounded-sm border border-status-todo-border bg-status-todo-bg px-2 py-0.5 font-mono text-[11px] text-status-todo uppercase">
           Todo
         </span>
 

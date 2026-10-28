@@ -1,26 +1,248 @@
 @import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-surface-canvas: hsl(var(--surface-canvas));
+  --color-surface-lowest: hsl(var(--surface-lowest));
+  --color-surface-low: hsl(var(--surface-low));
+  --color-surface-container: hsl(var(--surface-container));
+  --color-surface-high: hsl(var(--surface-high));
+  --color-border-hairline: hsl(var(--border-hairline));
+  --color-border-strong: hsl(var(--border-strong));
+  --color-text-primary: hsl(var(--text-primary));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-tertiary: hsl(var(--text-tertiary));
+  --color-text-disabled: hsl(var(--text-disabled));
+  --color-primary-hover: hsl(var(--primary-hover));
+  --color-primary-active: hsl(var(--primary-active));
+  --color-primary-muted: hsl(var(--primary-muted));
+  --color-primary-border: hsl(var(--primary-border));
+  --color-status-urgent: hsl(var(--status-urgent));
+  --color-status-urgent-bg: hsl(var(--status-urgent-bg));
+  --color-status-urgent-border: hsl(var(--status-urgent-border));
+  --color-status-progress: hsl(var(--status-progress));
+  --color-status-progress-bg: hsl(var(--status-progress-bg));
+  --color-status-progress-border: hsl(var(--status-progress-border));
+  --color-status-active: hsl(var(--status-active));
+  --color-status-active-bg: hsl(var(--status-active-bg));
+  --color-status-active-border: hsl(var(--status-active-border));
+  --color-status-resolved: hsl(var(--status-resolved));
+  --color-status-resolved-bg: hsl(var(--status-resolved-bg));
+  --color-status-resolved-border: hsl(var(--status-resolved-border));
+  --color-status-planning: hsl(var(--status-planning));
+  --color-status-planning-bg: hsl(var(--status-planning-bg));
+  --color-status-planning-border: hsl(var(--status-planning-border));
+  --color-status-todo: hsl(var(--status-todo));
+  --color-status-todo-bg: hsl(var(--status-todo-bg));
+  --color-status-todo-border: hsl(var(--status-todo-border));
+
+  --color-label-violet: hsl(var(--label-violet));
+  --color-label-violet-bg: hsl(var(--label-violet-bg));
+  --color-label-violet-border: hsl(var(--label-violet-border));
+  --color-label-magenta: hsl(var(--label-magenta));
+  --color-label-magenta-bg: hsl(var(--label-magenta-bg));
+  --color-label-magenta-border: hsl(var(--label-magenta-border));
+  --color-label-indigo: hsl(var(--label-indigo));
+  --color-label-indigo-bg: hsl(var(--label-indigo-bg));
+  --color-label-indigo-border: hsl(var(--label-indigo-border));
+  --color-label-olive: hsl(var(--label-olive));
+  --color-label-olive-bg: hsl(var(--label-olive-bg));
+  --color-label-olive-border: hsl(var(--label-olive-border));
+  --color-label-sand: hsl(var(--label-sand));
+  --color-label-sand-bg: hsl(var(--label-sand-bg));
+  --color-label-sand-border: hsl(var(--label-sand-border));
+  --color-label-plum: hsl(var(--label-plum));
+  --color-label-plum-bg: hsl(var(--label-plum-bg));
+  --color-label-plum-border: hsl(var(--label-plum-border));
+
+  --color-priority-high: hsl(var(--priority-high));
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-headline);
+  --font-mono: var(--font-code);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* shadcn/ui — Editorial Work Ledger (light) */
+    --background: 270 33% 98%;             /* #fbf8fc */
+    --foreground: 260 4% 11%;              /* #1c1b1f */
+    --card: 0 0% 100%;
+    --card-foreground: 260 4% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 260 4% 11%;
+    --primary: 174 88% 26%;                /* #087f73 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 270 10% 96%;              /* #f5f3f6 */
+    --secondary-foreground: 260 4% 11%;
+    --muted: 270 10% 96%;
+    --muted-foreground: 260 5% 39%;        /* #625e67; readable secondary copy */
+    --accent: 270 10% 92%;                 /* #ebe7ed */
+    --accent-foreground: 260 4% 11%;
+    --destructive: 0 75% 42%;              /* #ba1a1a */
+    --destructive-foreground: 0 0% 100%;
+    --border: 280 6% 86%;                  /* #dcd9dd */
+    --input: 280 6% 86%;
+    --ring: 174 88% 26%;
+    --radius: 0.25rem;                     /* 4px */
+
+    /* Editorial system extensions */
+    --surface-canvas: 270 33% 98%;
+    --surface-lowest: 0 0% 100%;
+    --surface-low: 270 10% 96%;
+    --surface-container: 280 10% 92%;
+    --surface-high: 280 11% 89%;
+    --border-hairline: 280 14% 92%;        /* #ebe7ed */
+    --border-strong: 260 5% 47%;           /* #79747e (UI borders need 3:1 only) */
+    --text-primary: 260 4% 11%;
+    --text-secondary: 260 5% 29%;          /* #49454f */
+    --text-tertiary: 260 5% 42%;           /* ~#696670, 4.6:1+ on every surface (AA) */
+    --text-disabled: 320 7% 64%;           /* #ab9ea6 (exempt from contrast) */
+    --primary-hover: 174 88% 21%;          /* #06635a */
+    --primary-active: 174 90% 16%;         /* #044c45 */
+    --primary-muted: 172 42% 93%;          /* #e6f3f1 */
+    --primary-border: 173 36% 71%;         /* #99cfc9 */
+    --status-urgent: 0 75% 42%;
+    --status-urgent-bg: 7 100% 92%;        /* #ffdad6 */
+    --status-urgent-border: 5 100% 84%;    /* #ffb4ab */
+    --status-progress: 29 90% 37%;         /* #b45309 */
+    --status-progress-bg: 48 96% 89%;      /* #fef3c7 */
+    --status-progress-border: 46 97% 75%;  /* #fde68a */
+    --status-active: 174 88% 26%;
+    --status-active-bg: 172 42% 93%;
+    --status-active-border: 173 36% 71%;
+    --status-resolved: 142 71% 29%;        /* #15803d */
+    --status-resolved-bg: 138 76% 91%;     /* #dcfce7 */
+    --status-resolved-border: 141 79% 85%; /* #bbf7d0 */
+    --status-planning: 215 16% 47%;        /* #64748b */
+    --status-planning-bg: 210 40% 96%;     /* #f1f5f9 */
+    --status-planning-border: 214 32% 81%; /* #cbd5e1 */
+
+    --status-todo: 212 80% 36%;
+    --status-todo-bg: 214 95% 93%;
+    --status-todo-border: 213 90% 82%;
+
+    /* Label palette (light): dark text on a light tint */
+    --label-violet: 262 50% 36%;   --label-violet-bg: 262 70% 95%;   --label-violet-border: 262 55% 82%;
+    --label-magenta: 322 62% 36%;  --label-magenta-bg: 322 80% 95%;  --label-magenta-border: 322 60% 83%;
+    --label-indigo: 232 52% 38%;   --label-indigo-bg: 232 70% 95%;   --label-indigo-border: 232 55% 83%;
+    --label-olive: 72 55% 27%;     --label-olive-bg: 72 50% 92%;     --label-olive-border: 72 40% 74%;
+    --label-sand: 36 45% 29%;      --label-sand-bg: 38 50% 92%;      --label-sand-border: 38 40% 76%;
+    --label-plum: 292 35% 33%;     --label-plum-bg: 292 30% 94%;     --label-plum-border: 292 25% 78%;
+
+    --priority-high: 17 88% 38%;   /* ~#b63c0c, about 5:1 on the page background */
+
+    /* Fonts: --font-inter / --font-newsreader / --font-jetbrains-mono
+       are injected by next/font in app/layout.tsx */
+    --font-headline: var(--font-newsreader), Georgia, 'Times New Roman', serif;
+    --font-body: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-code: var(--font-jetbrains-mono), 'SF Mono', 'Fira Code', Menlo, monospace;
+  }
+
+  .dark {
+    /* Obsidian Ledger (dark) */
+    --background: 225 13% 6%;              /* #0d0e11 */
+    --foreground: 40 24% 94%;              /* #f4f1ea */
+    --card: 230 5% 10%;                     /* #18191d */
+    --card-foreground: 40 24% 94%;
+    --popover: 230 5% 10%;
+    --popover-foreground: 40 24% 94%;
+    --primary: 174 80% 40%;                /* #14b8a6 */
+    --primary-foreground: 225 13% 6%;
+    --secondary: 225 6% 10%;               /* #121316 */
+    --secondary-foreground: 40 24% 94%;
+    --muted: 225 5% 13%;
+    --muted-foreground: 225 7% 65%;         /* #9fa3ad */
+    --accent: 225 7% 14%;                   /* #1e2025 */
+    --accent-foreground: 40 24% 94%;
+    --destructive: 7 85% 62%;              /* #f05a47 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 225 8% 18%;                  /* #282b33 */
+    --input: 225 8% 18%;
+    --ring: 174 80% 40%;
+    --radius: 0.25rem;
+
+    --surface-canvas: 225 13% 6%;
+    --surface-lowest: 225 7% 7%;            /* #0d0e11 */
+    --surface-low: 225 5% 8%;               /* #121316 */
+    --surface-container: 230 5% 10%;         /* #18191d */
+    --surface-high: 225 7% 14%;              /* #1e2025 */
+    --border-hairline: 225 9% 14%;           /* #20232a */
+    --border-strong: 225 8% 25%;             /* #383d49 */
+    --text-primary: 40 24% 94%;
+    --text-secondary: 225 7% 65%;
+    --text-tertiary: 228 6% 55%;             /* ~#858893, 4.6:1+ on every surface (AA) */
+    --text-disabled: 228 6% 40%;             /* #636773 (exempt from contrast) */
+    --primary-hover: 174 84% 32%;            /* #0d9488 */
+    --primary-active: 174 90% 26%;
+    --primary-muted: 174 80% 40% / 0.12;
+    --primary-border: 174 80% 40% / 0.35;
+    --status-urgent: 7 85% 62%;
+    --status-urgent-bg: 7 85% 62% / 0.12;
+    --status-urgent-border: 7 85% 62% / 0.35;
+    --status-progress: 38 92% 50%;            /* #f59e0b */
+    --status-progress-bg: 38 92% 50% / 0.12;
+    --status-progress-border: 38 92% 50% / 0.35;
+    --status-active: 174 80% 40%;
+    --status-active-bg: 174 80% 40% / 0.12;
+    --status-active-border: 174 80% 40% / 0.35;
+    --status-resolved: 160 84% 39%;           /* #10b981 */
+    --status-resolved-bg: 160 84% 39% / 0.12;
+    --status-resolved-border: 160 84% 39% / 0.35;
+    --status-planning: 228 6% 40%;
+    --status-planning-bg: 228 6% 40% / 0.12;
+    --status-planning-border: 228 6% 40% / 0.35;
+
+    --status-todo: 212 90% 68%;
+    --status-todo-bg: 212 90% 68% / 0.12;
+    --status-todo-border: 212 90% 68% / 0.35;
+
+    /* Label palette (dark): light text, 12% tint bg, 35% border (same pattern as status colors) */
+    --label-violet: 262 80% 74%;   --label-violet-bg: 262 80% 74% / 0.12;   --label-violet-border: 262 80% 74% / 0.35;
+    --label-magenta: 322 75% 70%;  --label-magenta-bg: 322 75% 70% / 0.12;  --label-magenta-border: 322 75% 70% / 0.35;
+    --label-indigo: 232 80% 74%;   --label-indigo-bg: 232 80% 74% / 0.12;   --label-indigo-border: 232 80% 74% / 0.35;
+    --label-olive: 72 55% 55%;     --label-olive-bg: 72 55% 55% / 0.12;     --label-olive-border: 72 55% 55% / 0.35;
+    --label-sand: 38 55% 62%;      --label-sand-bg: 38 55% 62% / 0.12;      --label-sand-border: 38 55% 62% / 0.35;
+    --label-plum: 292 45% 70%;     --label-plum-bg: 292 45% 70% / 0.12;     --label-plum-border: 292 45% 70% / 0.35;
+
+    --priority-high: 20 91% 60%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  code, kbd, samp, .font-mono {
+    font-family: var(--font-code);
+  }
 }

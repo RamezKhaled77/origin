@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
+const apiUrl = process.env.API_URL;
+
 const nextConfig: NextConfig = {
-  /* config options here */
   turbopack: {
     rules: {
       "*.css": {
@@ -9,6 +10,19 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+
+  async rewrites() {
+    if (!apiUrl) {
+      throw new Error("API_URL is not configured");
+    }
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${apiUrl}/:path*`,
+      },
+    ];
   },
 };
 

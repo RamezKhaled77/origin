@@ -19,7 +19,7 @@ If two files disagree, the order above wins.
 
 1. **Never build anything listed in `docs/DESIGN_EXCLUSIONS.md`**, not even as static UI. Mockups are a visual reference only; where they show old values (`ENG-104`, "Open / In Progress / Closed", Sprint/Cycle text), the written decisions win.
 2. **Never invent backend data.** No fields, endpoints, counts or statuses that are not in `docs/FRONTEND_DATA_CONTRACT.md`. If something is missing, say so and ask.
-3. **Enums and defaults come from `shared/`.** Never retype statuses, priorities, label colors or defaults, and import them only through `@shared/*` (the folder is an interim local copy of the backend contract).
+3. **Enums and defaults come from the confirmed backend contract or suitable frontend-local types/constants.** Never invent or retype values inconsistently, and do not create a `shared/` folder or `@shared/*` alias.
 4. **`app/` is routing only.** Pages and layouts stay thin; UI goes in `components/`, API calls in `lib/api/`.
 5. **Server Component by default.** Add `'use client'` only to the smallest component that needs state or events.
 6. **Reads on the server, writes from the client.** Pages and layouts fetch via `lib/api/server`. Mutations use `useMutation` (`lib/queries`) over `lib/api/client`, then invalidate and `router.refresh()`. TanStack Query is only for interactive data (Quick Search, @mentions, dropdown lists). No axios.

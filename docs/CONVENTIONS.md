@@ -24,10 +24,10 @@
 
 ## 2. Imports
 
-- Use the `@/` path alias for everything in this repo (the project root), and `@shared/*` for the contract folder. No `../../..` chains.
-- Import enums, types and Zod schemas from `@shared/*`. Never copy them into other files.
+- Use the `@/` path alias for everything in this repo (the project root). No `../../..` chains.
+- Import contract types, enums and schemas from their frontend-local source modules. Never copy them into other files or invent values.
 - Use `import type { ... }` for type-only imports.
-- Order: external packages, `shared/`, `@/` modules, relative imports, styles.
+- Order: external packages, `@/` modules, relative imports, styles.
 
 ---
 
@@ -47,7 +47,7 @@
 page.tsx / layout.tsx  →  lib/api/server/<resource>.ts  →  server/fetcher.ts  →  backend
 ```
 - The server fetcher uses `API_URL`, forwards the session cookie, redirects to `/sign-in` on `401`, and throws `ApiError` otherwise.
-- One function per backend operation. Return typed data (types from `shared/`). Never return raw `Response`.
+- One function per backend operation. Return typed data from frontend-local contract types. Never return raw `Response`.
 
 ### Writes
 ```
@@ -79,12 +79,12 @@ Client Component  →  useMutation (lib/queries/<resource>.ts)  →  lib/api/cli
 
 ## 5. Forms
 
-- Validate with the **Zod schemas from `shared/`**, so the client and the server enforce the same rules.
+- Validate with frontend-local Zod schemas aligned with the confirmed backend contract.
 - Form library: **react-hook-form** with the Zod resolver (the shadcn form pattern).
 - Every field has a visible `<label>`. Required fields are marked.
 - On submit: disable the submit button while pending; on validation failure, focus the **first** invalid field.
 - Errors: `aria-invalid` on the input, message linked with `aria-describedby`.
-- Defaults shown in a form (for example the status and priority of a new issue) come from `shared/` constants. Do not retype them.
+- Defaults shown in a form (for example the status and priority of a new issue) come from frontend-local contract constants. Do not retype them.
 - Password-strength hints are UX only; the backend decides what is enforced.
 
 ---

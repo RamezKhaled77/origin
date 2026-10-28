@@ -22,7 +22,7 @@ Mini Issue Tracker is a lightweight issue tracker for small engineering teams (l
 | Tokens | All design tokens live in `app/globals.css` (no separate `tokens.css`) |
 | Fonts | `next/font`: Inter (UI), Newsreader (serif, **normal + italic**), JetBrains Mono. CSS variables: `--font-inter`, `--font-newsreader`, `--font-jetbrains-mono` |
 | Repo | **Separate repos.** This repo is the Next.js app itself (the project root). The backend lives in its own repo. Package manager: pnpm (no workspaces) |
-| Shared code | `shared/` at the repo root holds TypeScript types, Zod schemas, **enums and defaults**, imported only through the alias `@shared/*`. **Interim:** a local copy kept identical to the backend contract. How the code is shared long term is **undecided** (see `DECISIONS.md` D-01) |
+| Shared code | There is no `shared/` folder or `@shared/*` alias. Keep types, schemas, enums and defaults in suitable frontend-local modules, aligned with the confirmed backend contract |
 | Data fetching | **Server-first** for pages and layouts. **TanStack Query** (client) only for interactive data: Quick Search, @mention picker, dropdown option lists. Mutations use `useMutation`, then invalidate + `router.refresh()`. **No axios**: native `fetch` everywhere |
 | Filters | Live in the **URL** (query params). A saved view is just a filters object |
 | Modals | Open/closed state in **React state** (not in the URL) |
@@ -36,7 +36,7 @@ Mini Issue Tracker is a lightweight issue tracker for small engineering teams (l
 
 1. **`app/` is routing only.** Layouts and `page.tsx` stay thin. No business logic and no reusable UI inside `app/`.
 2. **Server Component by default.** Add `'use client'` only to the smallest component that needs state or events (forms, dialogs, dropdowns, filters UI).
-3. **`shared/` is the single place** for statuses, priorities, label colors and defaults in the frontend. Never hardcode them elsewhere, and import them only through `@shared/*`, so the folder can later become an installed package without touching any call site.
+3. **Contract values have one frontend-local source of truth** for statuses, priorities, label colors and defaults. Never invent or duplicate them inconsistently, and keep them aligned with the confirmed backend contract.
 4. **Use design tokens, never raw colors.** Use the semantic Tailwind classes generated from `globals.css` (e.g. `bg-surface-low`, `text-text-secondary`, `text-status-progress`). No hex values in components.
 5. **Serif font is explicit.** Use `font-serif` only on page titles and modal titles (modal titles are italic). Panel titles stay Sans. Use `font-mono` for keys, counts, timestamps and small uppercase labels. There is **no global `h1`–`h4` font rule**.
 6. **Terminology:** always **Issue** (never task/ticket). Primary action label: **New Issue**.
@@ -55,7 +55,7 @@ Two separate repositories:
 <backend repo>    ← Express 5 + Drizzle + SQLite, built separately by someone else
 ```
 
-The two sides agree through `FRONTEND_DATA_CONTRACT.md`. Because there is no shared folder between repos, the enums, defaults and schemas the frontend needs live in its own `shared/` folder as an **interim copy**. Any change to those values on the backend must be communicated to the frontend.
+The two sides agree through `FRONTEND_DATA_CONTRACT.md`. Because there is no shared folder between repos, the enums, defaults and schemas the frontend needs live in suitable frontend-local modules. Any change to those values on the backend must be communicated to the frontend.
 
 ---
 
@@ -121,7 +121,6 @@ The two sides agree through `FRONTEND_DATA_CONTRACT.md`. Because there is no sha
 ├── providers/                      theme-provider, query-provider (the toast `Toaster` comes from components/ui/sonner)
 ├── proxy.ts                        light auth check (Next 16 renamed `middleware` to `proxy`)
 ├── next.config.ts                  rewrites: /api/* -> backend
-├── shared/                         INTERIM copy of the backend contract (enums, defaults, Zod schemas, types); import via `@shared/*`
 └── .env.example                    API_URL (no NEXT_PUBLIC_ prefix)
 ```
 
@@ -210,7 +209,7 @@ Rules:
 Data rendered by Server Components (an issue's status, priority, etc.) arrives as props, so TanStack's cache does not own it. For inline edits on that data use React 19 `useOptimistic`. TanStack optimistic updates only apply to data that lives in the query cache.
 
 ### Filters
-Filters are **URL query params** (`?status=todo,in_progress&priority=high&overdue=true`). `lib/filters` converts URL <-> filters object. A **saved view** stores that same filters object. The shape is defined in `shared/` and matches `FRONTEND_DATA_CONTRACT.md`.
+Filters are **URL query params** (`?status=todo,in_progress&priority=high&overdue=true`). `lib/filters` converts URL <-> filters object. A **saved view** stores that same filters object. The shape matches `FRONTEND_DATA_CONTRACT.md` and is represented in frontend-local types.
 
 ### Auth protection (three layers)
 1. `proxy.ts`: light check (is there a session cookie?), fast redirect to sign-in.
@@ -277,7 +276,7 @@ The backend returns `{ error: { code, message, fields } }`. `ApiError` carries i
 
 **Statuses:** `backlog`, `todo`, `in_progress`, `in_review`, `done`, `cancelled`
 **Priorities:** `no_priority`, `low`, `medium`, `high`, `urgent`
-**Defaults for a new issue:** `DEFAULT_ISSUE_STATUS`, `DEFAULT_ISSUE_PRIORITY` from `shared/` (proposed: `todo`, `no_priority`)
+**Defaults for a new issue:** `DEFAULT_ISSUE_STATUS`, `DEFAULT_ISSUE_PRIORITY` from frontend-local contract constants (proposed: `todo`, `no_priority`)
 
 | Status | Token |
 |---|---|
@@ -316,4 +315,4 @@ The full step-by-step guide, with every command, config file and checkpoint, is 
 1. **Projects: page vs modal.** The design has a Projects **modal** (list + New Project) while the route tree has `projects/page.tsx`. Proposal: the page is the full list, and the modal reuses the same `ProjectsTable` component for quick access.
 2. **Theme toggle.** Dark-mode tokens exist but there is no design for a toggle. Decide where it lives (user menu is the natural place).
 3. **Backend answers pending.** See the Open Questions in `FRONTEND_DATA_CONTRACT.md` (slug rules, project statuses, filter shape, multi-status filter, workspace issues endpoint, etc.).
-4. **How `shared/` is shared long term** (separate package/repo vs owned by the backend). Interim local copy until then.
+4. **Contract sharing:** not part of this frontend setup. Do not introduce `shared/` or `@shared/*`.

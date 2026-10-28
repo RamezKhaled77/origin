@@ -12,7 +12,7 @@
 
    > "اقرأ `PROJECT_CONTEXT.md` الأول وبعدها باقي الملفات المرفقة. الـ planning خلص، وأنا دلوقتي هبدأ التنفيذ بالترتيب في `SETUP.md`. اشتغل معايا بنفس القواعد المكتوبة في قسم 2. قولي إنك فهمت المشروع بملخص قصير، وبعدها نبدأ من المرحلة 0."
 
-3. The assistant should answer with a **short summary** of the project and the rules (to confirm understanding), then start at **Phase 0 of `SETUP.md`**.
+3. The assistant should answer with a **short summary** of the project and the rules (to confirm understanding), verify the current Git state, and continue with the next foundation-code step.
 
 ---
 
@@ -81,9 +81,9 @@
 | Fonts | `next/font`: Inter, Newsreader (normal + italic), JetBrains Mono → `--font-inter`, `--font-newsreader`, `--font-jetbrains-mono` |
 | Repos | **Separate repos.** This repo = the Next.js app at the root. Backend elsewhere |
 | Package manager | pnpm (no workspaces) |
-| Shared contract | Interim local folder `shared/` (enums, defaults, later Zod schemas/types), imported **only** via alias `@shared/*`. Long-term sharing between repos is **undecided** (D-01) |
+| Shared contract | No `shared/` folder or `@shared/*` alias. Use the confirmed backend contract and suitable frontend-local types/constants without inventing values |
 | Data | Server-first (Server Components). **TanStack Query** only for Quick Search, @mention picker, dropdown option lists; all mutations via `useMutation`; invalidate + `router.refresh()`. **No axios** |
-| Forms | react-hook-form + Zod resolver, schemas from `shared/` |
+| Forms | react-hook-form + Zod resolver, using the confirmed frontend/backend contract |
 | Filters | In the **URL** (query params) |
 | Modals | React state (not URL) |
 | Auth | Backend session cookie; frontend never touches tokens |
@@ -95,9 +95,9 @@
 
 ## 5. Architecture in short (details in `ARCHITECTURE.md`)
 
-**Rules:** `app/` = routing only; Server Component by default; `'use client'` on the smallest component; design tokens only (no hex, no raw palette classes, no `dark:` color overrides); serif only on page/modal titles via explicit `font-serif`; enums/defaults only from `shared/`.
+**Rules:** `app/` = routing only; Server Component by default; `'use client'` on the smallest component; design tokens only (no hex, no raw palette classes, no `dark:` color overrides); serif only on page/modal titles via explicit `font-serif`; enum/default values must come from the confirmed contract or frontend-local definitions.
 
-**Folders:** `app/`, `components/{ui,layout,auth,dashboard,workspaces,projects,issues,labels,views,comments}`, `lib/{api/server,api/client,queries,filters,issues,auth,utils}`, `hooks/`, `providers/{theme-provider,query-provider}`, `shared/`, `proxy.ts`, `next.config.ts`.
+**Folders:** `app/`, `components/{ui,layout,auth,dashboard,workspaces,projects,issues,labels,views,comments}`, `lib/{api/server,api/client,queries,filters,issues,auth,utils}`, `hooks/`, `providers/{theme-provider,query-provider}`, `proxy.ts`, `next.config.ts`.
 
 **Layouts (5):**
 1. `app/layout.tsx`: html/body, fonts, providers, Toaster.
@@ -142,7 +142,7 @@
 
 - **Statuses:** `backlog, todo, in_progress, in_review, done, cancelled`
 - **Priorities:** `no_priority, low, medium, high, urgent` (`no_priority` = muted dash + "No priority", sorts last)
-- **Defaults for a new issue:** `DEFAULT_ISSUE_STATUS = 'todo'`, `DEFAULT_ISSUE_PRIORITY = 'no_priority'` (proposed; the server applies them if omitted; the New Issue form **doesn't send** them unless the user changed them; the form still shows them from `shared/`)
+- **Defaults for a new issue:** `DEFAULT_ISSUE_STATUS = 'todo'`, `DEFAULT_ISSUE_PRIORITY = 'no_priority'` (proposed; the server applies them if omitted; the New Issue form **doesn't send** them unless the user changed them; keep these values aligned with the confirmed contract)
 - **Label colors (fixed 6, stored by key):** `violet, magenta, indigo, olive, sand, plum`
 - **Status → token:** backlog `status-planning`, todo `status-todo`, in_progress `status-progress`, in_review `status-active`, done `status-resolved`, cancelled muted + line-through
 - **Priority → token:** urgent `status-urgent`, high `priority-high` (orange), medium `status-progress`, low `text-tertiary`, no_priority `text-tertiary`
@@ -184,7 +184,7 @@ The user generated the missing screens in Stitch (New Issue, New Workspace, New/
 
 | ID | Decision |
 |---|---|
-| D-01 | Separate repos + pnpm; interim local `shared/` via `@shared/*` (long-term sharing pending) |
+| D-01 | Separate repos + pnpm; no local `shared/` folder or `@shared/*` alias |
 | D-02 | Next 16 + React 19 (PRD's React 18 was wrong) |
 | D-03/04 | Tailwind 4 CSS-first; tokens as HSL triplets through `@theme inline` |
 | D-05 | `next/font`, Newsreader with italic |
@@ -195,7 +195,7 @@ The user generated the missing screens in Stitch (New Issue, New Workspace, New/
 | D-10 | Unassigned tile replaces Cycle Velocity |
 | D-11 | No issue key |
 | D-12 | Fixed 6 label colors, stored by key |
-| D-13 | Defaults applied by the backend, defined once in `shared/` |
+| D-13 | Defaults applied by the backend and kept aligned with the confirmed frontend/backend contract |
 | D-14 | No Board in this version |
 | D-15/16 | Priority Overview has 5 rows; no comment edit/delete |
 | D-17 | Reserved workspace slugs |
@@ -244,19 +244,19 @@ It lists every form field (Required/Optional/Auto), filters, bulk actions, compu
 | Q14 | Endpoint for the workspace-wide issues list (filters + search + pagination) |
 | Q24 | **Session cookie name** and attributes (`HttpOnly`, `SameSite=Lax`, `Path=/`, no `Domain`, `Secure` in prod). Needed by `proxy.ts` |
 | Q25 | Zod major version on the backend (must match) |
-| Q26 | Are all backend routes under `/api`? Dev port? |
+| Q26 | ~~Are all backend routes under `/api`? Dev port?~~ Confirmed locally: `API_URL=http://localhost:5000`; confirmed auth routes are at backend root paths (`/auth/...`) and the frontend rewrite strips `/api`. |
 
-Also open: how `shared/` will be shared long term (separate package/repo vs owned by the backend).
+The long-term sharing question is closed for this frontend: do not introduce `shared/` or `@shared/*`.
 
 ---
 
 ## 12. Status and next steps
 
-**Planning is finished.** As far as this chat knows, **nothing has been executed yet**: no repo, no `create-next-app`, no `node -v` result was reported.
+**Setup is complete.** The handoff reports that phases 0–10 and all five Phase 11 validation commands passed. The Git commit still needs to be verified rather than assumed.
 
 **Do next, in order:**
 1. **Run `SETUP.md` phases 0–11**, one at a time, reporting each **Checkpoint**. The user should report anything that differs from the doc (the `create-next-app` and `shadcn init` prompts vary by version; especially whether shadcn's `globals.css` contains `@import "tw-animate-css"`, and the output if `shadcn add form` fails).
-2. **In parallel:** the user sends `FRONTEND_DATA_CONTRACT.md` to the backend developer and collects answers (esp. Q1, Q2, Q3, Q4, Q6, Q7, Q14, Q24, Q25, Q26) and discusses how `shared/` is shared.
+2. **In parallel:** the user sends `FRONTEND_DATA_CONTRACT.md` to the backend developer and collects answers for any remaining open contract questions.
 3. **Foundation code (guided, with tests where pure):** `ApiError` + server/client fetchers → `lib/filters` and `lib/issues` (pure logic) → `StatusBadge`, `PriorityIndicator`, `LabelChip` → `AppShell` + the two layouts → Sign In / Sign Up.
 4. **Then the pages** (proposed order, to be agreed with the user): Workspaces → Projects → Issues list → Issue detail → Dashboard → My Issues → Labels and Saved Views dialogs → Comments/Activity → Quick Search → Cross-workspace → Members/Join.
 

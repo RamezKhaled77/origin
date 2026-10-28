@@ -105,7 +105,7 @@ Use this as the reference when instructing any coding agent to implement the fro
 ### Terminology
 - Always **Issue** (never task/ticket). Primary action label: **New Issue**.
 
-### Enums (source of truth: `shared/`, imported by the frontend, never retyped)
+### Enums (source of truth: the confirmed backend contract, represented in frontend-local modules and never inconsistently retyped)
 ```ts
 ISSUE_STATUS   = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled']
 ISSUE_PRIORITY = ['no_priority', 'low', 'medium', 'high', 'urgent']
@@ -142,7 +142,7 @@ ISSUE_PRIORITY = ['no_priority', 'low', 'medium', 'high', 'urgent']
 - Auth pages and the Join page have no app shell.
 - **Issues page** (`/[workspaceSlug]/issues`): workspace-wide list. Same layout as My Issues without the "assigned to me" scope, plus an Assignee filter. Four tiles: Open, In Progress, Done, Overdue. Has a "Save as view" button.
 - **Saved views** are created with "Save as view" on the Issues page (current filters + a name). In the Saved Views modal, "+ New View" links to the Issues page, and edits are rename and delete only.
-- **New Issue form:** status and priority are optional. Defaults come from `shared/` (`DEFAULT_ISSUE_STATUS`, `DEFAULT_ISSUE_PRIORITY`), and the frontend only sends them if the user changed them.
+- **New Issue form:** status and priority are optional. Defaults come from frontend-local contract constants (`DEFAULT_ISSUE_STATUS`, `DEFAULT_ISSUE_PRIORITY`), and the frontend only sends them if the user changed them.
 - **Priority Overview** (Dashboard panel): 5 rows, including "No priority", so the rows sum to the total.
 - **Quick Search (⌘K)** is global across all of the user's workspaces. Results show the workspace name.
 

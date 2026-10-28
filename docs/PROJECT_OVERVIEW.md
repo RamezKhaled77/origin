@@ -97,11 +97,10 @@ mini-issue-tracker/
 │   ├── providers/             AuthProvider, QueryProvider (Client Components)
 │   ├── styles/
 │   │   └── tokens.css         "Engineering Ledger" design tokens (colors, type, spacing)
-│   ├── middleware.ts          Route protection for (app) group (redirect if no session)
+│   ├── proxy.ts               Lightweight cookie-presence route protection
 │   ├── next.config.ts         Includes API rewrites/proxy to backend
 │   └── package.json
-├── shared/                   Cross-layer TypeScript types + constants
-│   └── index.ts              Exports all shared types, constants, validators
+├── lib/contract/             Frontend-local contract types, constants and validators
 ├── specs/                    Spec Kit artifacts (spec, plan, data-model, contracts, tasks)
 ├── scripts/                  Audit/playwright scripts
 ├── test-results/             Test result storage
@@ -137,8 +136,8 @@ mini-issue-tracker/
 | **`app/(auth)/layout.tsx`** | Minimal layout for sign-in/sign-up (brand panel + form panel, no app shell) |
 | **`app/(app)/layout.tsx`** | Authenticated app shell (Sidebar + Header); enforces auth guard for all nested routes |
 | **`app/(app)/[workspaceSlug]/layout.tsx`** | Workspace-scoped layout (loads current workspace context for nested pages) |
-| **`middleware.ts`** | Route protection — redirects to `/sign-in` when no valid session cookie is present |
-| **`providers/AuthProvider.tsx`** | Auth context provider — user, loading, signin/signup/signout |
+| **`proxy.ts`** | Lightweight route protection — redirects to `/sign-in` when the session cookie is absent; the backend validates the session |
+| **`providers/`** | Theme and query providers; authentication uses the session cookie and server/client fetchers rather than an auth context |
 | **`lib/api/client.ts`** | Typed HTTP client wrapping fetch; exports `api` object and `ApiError` |
 | **`lib/api/*.ts`** | Per-resource API modules (auth, workspaces, projects, issues, labels, views) |
 | **`components/issues/IssueRow.tsx`** | Canonical ticket ledger row (used by all surfaces) |
@@ -157,7 +156,7 @@ mini-issue-tracker/
 
 | Module | Responsibility |
 |--------|---------------|
-| **`shared/index.ts`** | All shared types (User, Issue, Comment, Activity, Label, SavedView, etc.), constants (ISSUE_STATUSES, ISSUE_PRIORITIES, LABEL_COLORS), Zod schemas, and API shape contracts |
+| **Frontend-local contract modules** | Types, constants, Zod schemas and API shape contracts aligned with the backend |
 
 ## 5. Entry Points
 
@@ -168,7 +167,7 @@ mini-issue-tracker/
 
 ### Frontend
 - **File**: `frontend/app/layout.tsx` (root layout) with routes resolved by the App Router file system under `app/`.
-- **How it starts**: `npm run dev` → Next.js dev server on port 3001 (or configured port). Route groups `(auth)` and `(app)` split unauthenticated and authenticated experiences; `middleware.ts` enforces the auth guard on `(app)`.
+- **How it starts**: `pnpm dev` → Next.js dev server. Route groups `(auth)` and `(app)` split unauthenticated and authenticated experiences; `proxy.ts` performs the lightweight auth gate.
 - **Production build**: `npm run build` → Next.js build output (`.next/`).
 
 ## 6. Data Flow / Architecture
@@ -191,7 +190,7 @@ mini-issue-tracker/
 1. User interacts with React components (Client Components) rendered inside App Router pages
 2. Components call `api.*` methods in `frontend/lib/api/client.ts`
 3. HTTP requests go to `/api/*`, proxied to the Express backend via `next.config.ts` rewrites (dev and production)
-4. Session cookie sent with each request; `middleware.ts` also checks the cookie server-side before rendering protected routes
+4. Session cookie sent with each request; `proxy.ts` performs a lightweight cookie-presence check before rendering protected routes
 
 **Backend → Database**:
 1. Express routes call service functions
@@ -237,15 +236,15 @@ The app uses **SQLite** (file-based, WAL mode) via **Drizzle ORM**. The schema i
 
 ## 8. APIs / Endpoints
 
-All API routes are prefixed with `/api`. Authentication required for all endpoints (except auth routes).
+The frontend exposes `/api/*` for same-origin rewrites, but the confirmed backend auth routes are at root paths under `/auth`. The remaining resource routes in this reference are not confirmed by the current backend handoff.
 
 ### Auth
 | Method | Path | Purpose |
 |--------|------|---------|
-| POST | `/api/auth/signup` | Create account + session |
-| POST | `/api/auth/signin` | Sign in + session |
-| POST | `/api/auth/signout` | Sign out + clear cookie |
-| GET | `/api/auth/me` | Get current user |
+| POST | `/auth/signup` | Create account + session |
+| POST | `/auth/signin` | Sign in + session |
+| POST | `/auth/logout` | Sign out + clear cookie |
+| GET | `/auth/me` | Get current user |
 
 ### Workspaces
 | Method | Path | Purpose |

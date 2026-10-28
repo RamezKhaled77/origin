@@ -10,11 +10,10 @@ All entries below were decided on **2026-10-21** unless noted.
 
 ### D-01 Separate repos, pnpm (changed from monorepo)
 - **Decision:** the frontend and the backend are **separate repositories**. This repo is the Next.js app at its root. Package manager: pnpm, without workspaces.
-- **What changed:** the original plan was a monorepo with pnpm workspaces so that a `shared/` folder (enums, defaults, Zod schemas) could sit next to both codebases. The product owner decided on separate repos.
-- **Consequence:** there is no common folder for `shared/`. **How to share it long term is undecided.** Options: **A)** a third small repo installed by both sides from git with tagged versions; **B)** a local copy in each repo; **C)** the backend owns it and the frontend pulls it.
-- **Interim:** a local `shared/` folder at the repo root, kept identical to the backend contract, imported **only** through the `@shared/*` alias. When the long-term option is chosen, the alias target changes and no call site needs editing.
+- **What changed:** the original plan was a monorepo with pnpm workspaces so that a `shared/` folder could sit next to both codebases. The product owner decided on separate repos.
+- **Consequence:** there is no common folder for `shared/`, and this frontend does not create one. Contract values are represented in suitable frontend-local modules aligned with the backend contract.
 - **Risk of the interim:** the same values live in two places and can drift. Mitigation: `FRONTEND_DATA_CONTRACT.md` is the single reference, and any change to an enum, default or limit must be communicated to the frontend.
-- **Status:** long-term sharing strategy pending (to be discussed with the backend developer).
+- **Status:** settled for this frontend: no `shared/` folder and no `@shared/*` alias.
 
 ### D-02 Next.js 16 + React 19
 - **Decision:** Next.js 16 with React 19.
@@ -47,7 +46,7 @@ All entries below were decided on **2026-10-21** unless noted.
 ## B. Domain model and data
 
 ### D-08 Statuses and priorities come from the backend enums
-- **Decision:** statuses = `backlog, todo, in_progress, in_review, done, cancelled`; priorities = `no_priority, low, medium, high, urgent`. They live in `shared/`.
+- **Decision:** statuses = `backlog, todo, in_progress, in_review, done, cancelled`; priorities = `no_priority, low, medium, high, urgent`. They live in frontend-local contract modules aligned with the backend.
 - **Why:** these are the real values. The mockups showed 3 statuses (Open / In Progress / Closed), which was wrong; the mockups are treated as a visual reference and the code uses the real enums.
 - **Status colors:** backlog → `--status-planning`, todo → `--status-todo` (new blue token), in_progress → `--status-progress`, in_review → `--status-active`, done → `--status-resolved`, cancelled → muted text + line-through.
 - **`no_priority`:** muted dash plus the text "No priority"; sorts last.
@@ -72,8 +71,8 @@ All entries below were decided on **2026-10-21** unless noted.
 - **Note:** violet, plum and magenta are close, so the label name must always be visible.
 
 ### D-13 Defaults for a new issue are applied by the backend
-- **Decision:** the New Issue form does not send `status` or `priority` unless the user changed them. The defaults (`DEFAULT_ISSUE_STATUS`, `DEFAULT_ISSUE_PRIORITY`, proposed `todo` and `no_priority`) are defined once in `shared/`.
-- **Why:** the form must still *show* the default to the user, so both sides need to know the value. Defining it once in `shared/` avoids writing it twice and having them drift.
+- **Decision:** the New Issue form does not send `status` or `priority` unless the user changed them. The defaults (`DEFAULT_ISSUE_STATUS`, `DEFAULT_ISSUE_PRIORITY`, proposed `todo` and `no_priority`) are kept aligned with the confirmed frontend/backend contract.
+- **Why:** the form must still *show* the default to the user, so both sides need to know the value. Keeping it in a frontend-local contract module avoids duplicating it across UI code.
 - **Rejected:** always sending explicit values (the original proposal; the product owner preferred server-side defaults).
 
 ### D-14 No Board in this version
@@ -169,11 +168,11 @@ All entries below were decided on **2026-10-21** unless noted.
 - **Why:** the common React convention, so tools and contributors follow it without being told.
 
 ### D-31 `@/` import alias
-- **Decision:** `@/` points to the repo root, and a second alias `@shared/*` points to `shared/`. No `../../..` chains.
+- **Decision:** `@/` points to the repo root. There is no `@shared/*` alias. No `../../..` chains.
 - **Why:** shorter imports that survive file moves; it is also the shadcn default.
 
 ### D-32 Forms: react-hook-form + Zod
-- **Decision:** react-hook-form with the Zod resolver, using the Zod schemas from `shared/`.
+- **Decision:** react-hook-form with the Zod resolver, using frontend-local Zod schemas aligned with the confirmed backend contract.
 - **Why:** the app has many forms (issue, project, label, workspace, sign-in/up). The library handles field state, error messages and focusing the first invalid field, and shadcn's form component is built on it.
 - **Rejected:** plain controlled state with `safeParse` (simpler to start, but that logic would be rewritten in every form).
 
@@ -212,5 +211,5 @@ All entries below were decided on **2026-10-21** unless noted.
 1. **Projects: page vs modal.** The design has a Projects modal; the route tree has `projects/page.tsx`. Proposal: the page is the full list and the modal reuses the same table component. Decide when building Projects.
 2. **Theme toggle.** Dark tokens exist; there is no design for the switch. Proposal: in the user menu. Decide when building the topbar.
 3. **Tile numerals font.** Serif in the mockups; the serif rule says titles only. Decide when building the tiles.
-4. **How `shared/` is shared long term** (D-01): separate package/repo vs owned by the backend. Interim local copy until then; to be discussed with the backend developer.
+4. **Contract sharing:** not part of this frontend setup. Do not introduce `shared/` or `@shared/*`.
 5. **Backend answers.** See the open questions in `FRONTEND_DATA_CONTRACT.md`.

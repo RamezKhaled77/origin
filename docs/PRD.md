@@ -85,7 +85,7 @@ The frontend uses the App Router with the following conventions (full tree in `P
 - **`app/`** holds routing only — layouts and `page.tsx` files. No business logic or reusable components live here.
 - **Route groups** `(auth)` and `(app)` separate the unauthenticated experience (sign-in/sign-up, no app shell) from the authenticated experience (sidebar/header shell, auth-guarded).
 - **`[workspaceSlug]`** is a dynamic segment — every workspace-scoped page (dashboard, projects, issues, my-issues, labels, saved-views) is nested under it, keeping the URL structure aligned with the product's mental model (Workspace → Projects → Issues).
-- **`middleware.ts`** enforces the auth guard on the `(app)` route group — no valid session cookie redirects to `/sign-in`.
+- **`proxy.ts`** performs the lightweight cookie-presence auth gate — no session cookie redirects to `/sign-in`; the backend remains the authority for session validity.
 - **`components/`, `lib/`, `hooks/`, `providers/`, `styles/`** sit outside `app/`, at the top level of `frontend/` (no `src/` wrapper).
 - **`lib/api/`** contains one module per resource (`auth.ts`, `workspaces.ts`, `projects.ts`, `issues.ts`, `labels.ts`, `views.ts`) plus a shared `client.ts` fetch wrapper, rather than one monolithic `api/client.ts`.
 - **Backend connectivity**: since the backend is a separate Express server, `next.config.ts` must proxy `/api/*` requests to it (via rewrites) so that the session cookie works correctly across both dev and production without CORS/domain issues. This decision must be finalized before auth work starts (see §8 Open Questions).
@@ -96,7 +96,7 @@ The frontend uses the App Router with the following conventions (full tree in `P
 2. Backend foundation: DB schema, migrations (Drizzle Kit), auth, core middleware (session, security, error handling)
 3. Backend resources in dependency order: workspaces → projects → issues → comments → labels → dashboard → my-issues → search → saved views
 4. Backend tests alongside each resource (not deferred to the end)
-5. Frontend foundation: `next.config.ts` API proxy + `middleware.ts` auth guard + design tokens + root/`(auth)`/`(app)` layouts
+5. Frontend foundation: `next.config.ts` API rewrite + `proxy.ts` auth gate + design tokens + root/`(auth)`/`(app)` layouts
 6. Frontend shared components (`components/ui`, `components/layout`) before page-level components
 7. Frontend pages, roughly following the same resource order as the backend
 8. Frontend tests + accessibility tests
@@ -134,14 +134,14 @@ The design system, "Engineering Ledger," is characterized by:
 
 ### 4.1 Sign In
 
-- Email + password fields, "Sign in" button → `POST /api/auth/signin`.
+- Email + password fields, "Sign in" button → `POST /auth/signin` through the frontend `/api` rewrite.
 - Standard client-side validation (required fields, email format).
 - Link to Sign Up screen.
 - The brand panel may keep static/marketing copy, but must **not** display fabricated live stats (uptime %, live audit status) as if they were real data.
 
 ### 4.2 Sign Up
 
-- Full Name, Work Email, Password fields, "Create Account" button → `POST /api/auth/signup`.
+- Full Name, Work Email, Password and Password Confirmation fields, "Create Account" button → `POST /auth/signup` through the frontend `/api` rewrite.
 - Client-side password strength indicators (length, character variety) are fine as pure frontend UX.
 - Link to Sign In screen.
 
@@ -317,7 +317,7 @@ The following design elements appeared in the approved mockups but were reviewed
 
 Out of scope for v1, but worth tracking:
 
-- **Frontend-backend connectivity**: finalize whether `next.config.ts` rewrites proxy `/api/*` to the Express backend in both dev and production, or whether the backend sets cookie/CORS settings to support a separate frontend origin directly. This must be decided before auth work starts, since it affects how the session cookie behaves.
+- **Frontend-backend connectivity**: the frontend uses a same-origin `next.config.ts` rewrite from `/api/*` to the backend origin, with `API_URL=http://localhost:5000` locally. Confirm deployment-specific origins before production.
 - Whether "Last activity" per workspace needs a dedicated backend endpoint or can be computed from already-fetched data (affects performance at scale).
 - Whether to add API versioning, a CI pipeline, or separate session storage from the app database — none of these block v1, but are worth deciding before the project grows.
 - If real CSV export, SSO, milestones, or sprints are wanted later, they should be scoped as separate feature initiatives with their own design — not bundled into v1.

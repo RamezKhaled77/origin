@@ -84,64 +84,21 @@ git commit -m "chore: scaffold Next.js app and project docs"
 
 ---
 
-## Phase 2 — TypeScript, aliases and the interim `shared/` folder
+## Phase 2 — TypeScript and the `@/` alias
 
 ### 2.1 Path aliases
-In `tsconfig.json`, make `compilerOptions.paths` contain both aliases:
+The project uses only the root alias already present in `tsconfig.json`:
 
 ```json
 "paths": {
-  "@/*": ["./*"],
-  "@shared/*": ["./shared/*"]
+  "@/*": ["./*"]
 }
 ```
 
-**Why `@shared/*`:** every import of the contract goes through this one alias, so when we decide how `shared` is really shared between the two repos, only the alias target changes (decision D-01).
+Do not add a `shared/` folder or an `@shared/*` alias. Contract types, enums, schemas and defaults belong in suitable frontend-local modules and must stay aligned with the confirmed backend contract.
 
-### 2.2 The interim `shared/` folder
-Create these files. The enums are the backend's real values. The label colors and the two defaults are **proposed** and must be confirmed with the backend developer.
-
-`shared/enums.ts`
-```ts
-// INTERIM copy of the backend contract. Keep identical to the backend.
-// Import only through the alias: import { ... } from "@shared/enums"
-
-export const ISSUE_STATUS = [
-  "backlog",
-  "todo",
-  "in_progress",
-  "in_review",
-  "done",
-  "cancelled",
-] as const;
-export type IssueStatus = (typeof ISSUE_STATUS)[number];
-
-export const ISSUE_PRIORITY = ["no_priority", "low", "medium", "high", "urgent"] as const;
-export type IssuePriority = (typeof ISSUE_PRIORITY)[number];
-
-export const WORKSPACE_ROLE = ["owner", "member"] as const;
-export type WorkspaceRole = (typeof WORKSPACE_ROLE)[number];
-
-// PROPOSED, confirm with the backend (Q3 in FRONTEND_DATA_CONTRACT.md)
-export const LABEL_COLORS = ["violet", "magenta", "indigo", "olive", "sand", "plum"] as const;
-export type LabelColor = (typeof LABEL_COLORS)[number];
-
-// PROPOSED defaults for a new issue (the server applies them if the field is omitted)
-export const DEFAULT_ISSUE_STATUS: IssueStatus = "todo";
-export const DEFAULT_ISSUE_PRIORITY: IssuePriority = "no_priority";
-```
-
-`shared/README.md`
-```md
-# shared/ (interim)
-
-A local copy of the backend contract: enums, defaults, and later the Zod schemas and types.
-**Do not edit values here on your own.** They must match the backend. Any change comes from the backend developer.
-How this folder is shared long term between the two repos is undecided (see DECISIONS.md, D-01).
-Always import through the `@shared/*` alias.
-```
-
-**Why `as const` and derived types:** the array is the single source, and `IssueStatus` is derived from it. Add a value to the array and the type updates by itself, so TypeScript flags every place that must handle the new value.
+### 2.2 Frontend-local contract modules
+When feature work introduces enums, types, schemas or defaults, keep each contract definition in the appropriate frontend-local module under `lib/` and import it through `@/`. Use the backend contract as the source of truth; do not invent values or duplicate definitions.
 
 ### 2.3 Verify strictness
 ```bash
@@ -467,7 +424,7 @@ In `tsconfig.json`, add to `compilerOptions`:
 ```json
 "types": ["vitest/globals"]
 ```
-**Why `tsconfigPaths`:** it makes tests understand `@/` and `@shared/` from `tsconfig.json`, so we do not repeat the aliases.
+**Why `tsconfigPaths`:** it makes tests understand the `@/` alias from `tsconfig.json`, so we do not repeat the alias.
 
 ### 8.3 Important limitation
 **Vitest does not support `async` Server Components.** Our pages are async Server Components, so we do not unit-test the page file itself. We test: pure logic (`lib/filters`, `lib/issues`), Client Components, and presentational components. Keep pages thin (decision in `ARCHITECTURE.md`) so little logic lives in untestable files.
@@ -509,11 +466,11 @@ expect.extend(axeMatchers);
 `.env.example` (committed)
 ```
 # Backend origin, no trailing slash. Server-side only: never use the NEXT_PUBLIC_ prefix.
-API_URL=http://localhost:4000
+API_URL=http://localhost:5000
 ```
 Create your own `.env.local` with the real value (it is not committed):
 ```
-API_URL=http://localhost:4000
+API_URL=http://localhost:5000
 ```
 **The port is a placeholder.** Ask the backend developer for the real one.
 
@@ -533,21 +490,20 @@ if (!API_URL) {
 
 const nextConfig: NextConfig = {
   async rewrites() {
-    return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];
+    return [{ source: "/api/:path*", destination: `${API_URL}/:path*` }];
   },
 };
 
 export default nextConfig;
 ```
 **Why a rewrite:** the browser talks to `/api/*` on the same origin, and Next forwards it to the backend. So the session cookie works without CORS.
-**Assumptions to confirm with the backend:** its routes live under `/api` (Q26 in the contract).
+The confirmed auth routes live at backend root paths such as `/auth/signin`; the rewrite strips the frontend `/api` prefix before forwarding.
 **Deployment note:** the rewrite destination is fixed at build time, so `API_URL` must be set when you run `pnpm build`, not only when you run the server.
 
 ### 9.3 Session cookie name
 `lib/auth/session.ts`
 ```ts
-// TODO(backend): confirm the real cookie name (Q24 in FRONTEND_DATA_CONTRACT.md).
-export const SESSION_COOKIE_NAME = "session";
+export const SESSION_COOKIE_NAME = "sid";
 ```
 
 ### 9.4 `proxy.ts` (Next.js 16 name for the old `middleware.ts`)
@@ -605,13 +561,13 @@ mkdir -p \
   components/layout components/auth components/dashboard components/workspaces \
   components/projects components/issues components/labels components/views components/comments \
   lib/api/server lib/api/client lib/queries lib/filters lib/issues lib/utils lib/auth \
-  hooks providers shared
+  hooks providers
 
 # Git does not track empty folders, so keep them with a placeholder
 find app components lib hooks -type d -empty -exec touch {}/.gitkeep \;
 ```
 
-(`components/ui`, `lib/utils.ts`, `providers/` and `shared/` already have files, so they do not need a placeholder.)
+(`components/ui`, `lib/utils.ts` and `providers/` already have files, so they do not need a placeholder.)
 
 Compare with the tree in `ARCHITECTURE.md` section 5. The only things that may still be missing are files, which we create as we build each feature.
 
@@ -658,7 +614,7 @@ The **foundation code** is the next stage, built with guidance, in this order:
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `Cannot find module '@shared/enums'` | Alias missing in `tsconfig.json` | Phase 2.1 |
+| `Cannot find module '@shared/enums'` | An obsolete `shared/` import remains | Replace it with the frontend-local contract module; do not add `shared/` or `@shared/*` |
 | Fonts fall back to a system font | `variable` names in `layout.tsx` differ from `globals.css` | Use exactly `--font-inter`, `--font-newsreader`, `--font-jetbrains-mono` |
 | Everything stays light after adding `dark` | `@custom-variant dark` missing, or tokens not merged | Re-check Phase 5 |
 | Build error about `cookies()` outside Suspense | Cache Components got enabled | Remove `cacheComponents` from `next.config.ts` |

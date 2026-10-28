@@ -117,7 +117,7 @@ Rules:
 ### Status badge
 - Always shows the status **text** (mono, uppercase, 10–11px). Small, square-ish, 1px border, tint background, text from the token family above.
 - `cancelled` has no tint: muted text with line-through.
-- One component, `StatusBadge`, driven by the status enum from `shared/`.
+- One component, `StatusBadge`, driven by the frontend-local status enum aligned with the confirmed backend contract.
 
 ### Priority indicator
 - Always **icon + text**, never color alone.

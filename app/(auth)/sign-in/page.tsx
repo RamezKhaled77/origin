@@ -1,0 +1,38 @@
+import { SignInForm } from "@/components/auth/SignInForm";
+
+export default function SignInPage() {
+  return (
+    <main className="flex flex-1 items-center px-6 py-12">
+      <div className="mx-auto grid w-full max-w-5xl overflow-hidden border border-border bg-surface-lowest md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <section className="hidden border-r border-border bg-surface-low p-10 md:block">
+          <p className="mb-16 font-mono text-[10px] tracking-[0.18em] text-text-tertiary uppercase">
+            Focused work, clearly tracked
+          </p>
+          <h1 className="max-w-sm font-serif text-4xl leading-tight tracking-tight text-text-primary">
+            Keep your team&apos;s work moving.
+          </h1>
+          <p className="mt-5 max-w-sm text-sm leading-6 text-text-secondary">
+            A calm workspace for issues, projects, and the details that help engineering teams make
+            progress.
+          </p>
+        </section>
+
+        <section className="p-8 sm:p-10">
+          <div className="mx-auto max-w-md">
+            <p className="font-mono text-[10px] tracking-[0.18em] text-text-tertiary uppercase">
+              Account access
+            </p>
+            <h2 className="mt-3 font-serif text-3xl tracking-tight text-text-primary">
+              Sign in to Origin
+            </h2>
+            <p className="mt-2 text-sm text-text-secondary">
+              Use your account credentials to continue.
+            </p>
+            <div className="my-7 border-t border-border-hairline" />
+            <SignInForm />
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}

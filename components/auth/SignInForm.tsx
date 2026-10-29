@@ -7,12 +7,19 @@ import { useForm } from "react-hook-form";
 
 import { signInSchema, type SignInFormValues } from "@/lib/auth/schemas";
 
+import { useRouter } from "next/navigation";
+
+import { apiFetch } from "@/lib/api/client/fetcher";
+import { ApiError } from "@/lib/api/errors";
+import type { AuthResponse } from "@/lib/auth/types";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { PasswordInput } from "./PasswordInput";
 import { LoaderCircle } from "lucide-react";
+import { useState } from "react";
 
 export function SignInForm() {
   const {
@@ -26,10 +33,27 @@ export function SignInForm() {
       password: "",
     },
   });
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const onSubmit = async (values: SignInFormValues) => {
-    // We'll connect the sign-in API in the next step.
-    console.log(values);
+    setServerError(null);
+
+    try {
+      await apiFetch<AuthResponse>("/api/auth/signin", {
+        method: "POST",
+        body: values,
+      });
+
+      router.replace("/");
+      router.refresh();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setServerError(error.status === 401 ? "Invalid email or password." : error.message);
+      } else {
+        setServerError("Something went wrong. Please try again.");
+      }
+    }
   };
 
   return (
@@ -69,6 +93,12 @@ export function SignInForm() {
           </p>
         )}
       </div>
+
+      {serverError && (
+        <p role="alert" className="text-sm text-destructive">
+          {serverError}
+        </p>
+      )}
 
       <Button disabled={isSubmitting} className="h-10 w-full" type="submit">
         {isSubmitting ? (

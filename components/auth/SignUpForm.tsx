@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LoaderCircle } from "lucide-react";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { apiFetch } from "@/lib/api/client/fetcher";
+import { ApiError } from "@/lib/api/errors";
+import type { AuthResponse } from "@/lib/auth/types";
+
 import { PasswordInput } from "./PasswordInput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,8 +33,33 @@ export function SignUpForm() {
     },
   });
 
+  const router = useRouter();
+  const [serverError, setServerError] = useState<string | null>(null);
+
   const onSubmit = async (values: SignUpFormValues) => {
-    console.log(values);
+    setServerError(null);
+
+    try {
+      await apiFetch<AuthResponse>("/api/auth/signup", {
+        method: "POST",
+        body: values,
+      });
+
+      router.replace("/workspaces");
+      router.refresh();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409) {
+          setServerError("An account with this email already exists.");
+        } else if (error.status === 400) {
+          setServerError("Please check your form data and make sure the passwords match.");
+        } else {
+          setServerError(error.message);
+        }
+      } else {
+        setServerError("Something went wrong. Please try again.");
+      }
+    }
   };
 
   return (
@@ -99,6 +131,12 @@ export function SignUpForm() {
           </p>
         )}
       </div>
+
+      {serverError && (
+        <p role="alert" className="text-sm text-destructive">
+          {serverError}
+        </p>
+      )}
 
       <Button disabled={isSubmitting} className="h-10 w-full" type="submit">
         {isSubmitting ? (

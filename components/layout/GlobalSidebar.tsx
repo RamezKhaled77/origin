@@ -1,3 +1,5 @@
+ "use client";
+
 import Link from "next/link";
 import {
   FolderKanban,
@@ -5,6 +7,7 @@ import {
   ListChecks,
   UserRound,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -33,6 +36,14 @@ export function GlobalSidebar({
   userName,
   activeItem = "workspaces",
 }: GlobalSidebarProps) {
+  const pathname = usePathname();
+  const currentItem =
+    pathname === "/workspaces/all"
+      ? "all-projects"
+      : pathname === "/my-issues"
+        ? "my-issues"
+        : activeItem;
+
   return (
     <div className="flex min-h-screen flex-col">
       <div className="border-b border-border px-3 py-3">
@@ -55,10 +66,10 @@ export function GlobalSidebar({
             <li key={key}>
               <Link
                 href={href}
-                aria-current={activeItem === key ? "page" : undefined}
+                aria-current={currentItem === key ? "page" : undefined}
                 className={cn(
                   "flex h-8 items-center gap-2 px-2 text-sm text-text-secondary transition-colors hover:bg-surface-low hover:text-text-primary",
-                  activeItem === key && "bg-primary-muted font-medium text-primary",
+                  currentItem === key && "bg-primary-muted font-medium text-primary",
                 )}
               >
                 <Icon size={15} strokeWidth={1.7} aria-hidden="true" />

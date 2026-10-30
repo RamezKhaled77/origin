@@ -1,4 +1,7 @@
+ "use client";
+
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -9,6 +12,14 @@ type AppShellProps = {
 };
 
 export function AppShell({ sidebar, actions, children }: AppShellProps) {
+  const pathname = usePathname();
+  const section =
+    pathname === "/workspaces/all"
+      ? "All Projects"
+      : pathname === "/my-issues"
+        ? "My Issues"
+        : "Workspaces";
+
   return (
     <div className="flex min-h-screen bg-surface-canvas text-text-primary">
       <a
@@ -23,7 +34,7 @@ export function AppShell({ sidebar, actions, children }: AppShellProps) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-9 shrink-0 items-center justify-between border-b border-border bg-surface-lowest px-3">
           <p className="font-mono text-[11px] text-text-secondary" aria-label="Current location">
-            Origin / <span className="text-primary">Workspaces</span>
+            Origin / <span className="text-primary">{section}</span>
           </p>
           <div className="flex items-center gap-2">{actions}</div>
         </header>

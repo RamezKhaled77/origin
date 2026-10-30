@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
+import { vi } from "vitest";
 
 import { GlobalSidebar } from "./GlobalSidebar";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/workspaces",
+}));
 
 describe("GlobalSidebar", () => {
   it("marks the current global route and does not add excluded navigation", () => {
